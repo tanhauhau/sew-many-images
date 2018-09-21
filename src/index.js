@@ -3,11 +3,12 @@ const path = require('path');
 const fs = require('fs');
 
 
-export function packImages(folderDir, outputName, padding = 0) {
-  console.log(folderDir);
+export function packImages(folderDir, outputName, padding, generateHtml) {
   try {
     fs.readdir(folderDir, (err, files) => {
+      console.log('asdf1')
       if (files) {
+        console.log('asdf2')
         const promises = [];
         for (let i = 0; i < files.length; i += 1) {
           const file = files[i];
@@ -15,9 +16,10 @@ export function packImages(folderDir, outputName, padding = 0) {
           promises.push(decodeFromStream(path.join(folderDir, file), extension));
         }
         Promise.all(promises).then((values) => {
-          stitchImages(values, padding, outputName);
+          console.log('asdf3')
+          stitchImages(values, padding, outputName, generateHtml);
           return true;
-        }).catch(err2 => err2);
+        }).catch(err2 => console.error(err2));
       } else {
         console.error(err);
       }
@@ -40,7 +42,8 @@ function decodeFromStream(filePath, extension) {
   }
 }
 
-function stitchImages(values, pad, outputName) {
+function stitchImages(values, pad, outputName, generateHtml) {
+  console.log('stitching', generateHtml);
   const sortedImages = values.sort((a, b) => a.height < b.height);
   const boxPlacements = calculatePlacements(sortedImages, pad);
   const { boxes, maxWidth, maxHeight } = boxPlacements;
@@ -69,9 +72,12 @@ function stitchImages(values, pad, outputName) {
     });
     boxsizes.push({ x: outputWidth, y: outputHeight });
   }
-  console.log(boxes, backgroundSize, backgroundPos);
+  // console.log(boxes, backgroundSize, backgroundPos);
   encodeImage(outputImage, pad, outputName);
-  writeHtmlTest(boxsizes, backgroundSize, backgroundPos);
+  if (generateHtml) {
+    console.log('writingHtml');
+    writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName);
+  }
 }
 
 function calcBackgroundAxis(spriteSize, imageSize) {
@@ -82,17 +88,17 @@ function calcBackgroundPos(offset, spriteSize, imageSize) {
   return 100 * offset / Math.abs(spriteSize - imageSize);
 }
 
-function writeHtmlTest(boxsizes, backgroundSize, backgroundPos) {
+function writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName) {
   let toWrite = '<html>';
   for (let i = 0; i < backgroundSize.length; i += 1) {
-    toWrite += `<div style="background-image: url('testImage.png'); width: ${boxsizes[i].x}; height:  ${boxsizes[i].y}; background-size: ${backgroundSize[i].x}% ${backgroundSize[i].y}%; background-position: ${backgroundPos[i].x}% ${backgroundPos[i].y}%;"> </div>`;
+    toWrite += `<div style="background-image: url('${outputName}'); width: ${boxsizes[i].x}; height:  ${boxsizes[i].y}; background-size: ${backgroundSize[i].x}% ${backgroundSize[i].y}%; background-position: ${backgroundPos[i].x}% ${backgroundPos[i].y}%;"> </div>`;
   }
   toWrite += '</html>';
   fs.writeFile('index.html', toWrite, (err) => {
     if (err) {
-      return console.log(err);
+      console.error(err);
     }
-    console.log('The file was saved!');
+    console.log('html generated!');
     return true;
   });
 }

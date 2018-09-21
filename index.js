@@ -4,15 +4,15 @@ import { packImages } from './src';
 const path = require('path');
 const minimist = require('minimist');
 
-export function genSprite() {
+export default function genSprite() {
   const argv = minimist(process.argv);
-  // console.log(argv, process.cwd());
-  const givenDirectory = argv.from || '';
+  const givenDirectory = argv.from || argv.f || '';
   const calleeDirectory = process.cwd();
-  const outputName = 'testImage.png';
-  const padding = 10;
-
-  packImages(path.resolve(calleeDirectory, givenDirectory), outputName, padding);
+  const outputName = argv.out || argv.o || 'sprite.png';
+  const padding = argv.pad || argv.p || 10;
+  const generateHtml = argv.generateHtml || argv.g || false;
+  console.log(givenDirectory, generateHtml);
+  packImages(path.resolve(calleeDirectory, givenDirectory), outputName, padding, generateHtml);
 }
 
 genSprite();
