@@ -1,5 +1,5 @@
 {
-  "name": "responsivecssgen",
+  "name": "sew-many-images",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -22,8 +22,8 @@
     "eslint-plugin-react": "^7.11.1",
     "rimraf": "^2.6.2"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "tenzy@seagroup",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
     "minimist": "^1.2.0",
