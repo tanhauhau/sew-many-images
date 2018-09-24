@@ -1,14 +1,20 @@
 const PImage = require('pureimage');
 const path = require('path');
 const fs = require('fs');
+const chalk = require('chalk');
+
+const error = chalk.bold.red;
+const warning = chalk.keyword('orange');
+const success = chalk.bold.green;
 
 
-export function packImages(folderDir, outputName, padding, generateHtml) {
+export function packImages(inputs) {
+  const {
+    folderDir, outputName, padding, generateHtml, styleName, stylePrefix,
+  } = inputs;
   try {
     fs.readdir(folderDir, (err, files) => {
-      console.log('asdf1')
       if (files) {
-        console.log('asdf2')
         const promises = [];
         for (let i = 0; i < files.length; i += 1) {
           const file = files[i];
@@ -16,16 +22,23 @@ export function packImages(folderDir, outputName, padding, generateHtml) {
           promises.push(decodeFromStream(path.join(folderDir, file), extension));
         }
         Promise.all(promises).then((values) => {
-          console.log('asdf3')
-          stitchImages(values, padding, outputName, generateHtml);
+          const toStitch = values.filter((value) => {
+            if (value.error) {
+              console.log(warning(value.error));
+            }
+            return !value.error;
+          });
+          stitchImages({
+            toStitch, padding, outputName, generateHtml, styleName, stylePrefix,
+          });
           return true;
-        }).catch(err2 => console.error(err2));
+        }).catch(err2 => console.log(error(err2)));
       } else {
-        console.error(err);
+        console.log(error(err));
       }
     });
   } catch (e) {
-    console.error(e);
+    console.log(error(e));
   }
 }
 
@@ -38,16 +51,19 @@ function decodeFromStream(filePath, extension) {
     case '.png':
       return PImage.decodePNGFromStream(fs.createReadStream(filePath));
     default:
-      return Promise.reject(new Error('extension not handled'));
+      return Promise.resolve({ error: `${extension} not handled` });
+      // return Promise.reject(new Error(`${extension} extension not handled`));
   }
 }
 
-function stitchImages(values, pad, outputName, generateHtml) {
-  console.log('stitching', generateHtml);
-  const sortedImages = values.sort((a, b) => a.height < b.height);
-  const boxPlacements = calculatePlacements(sortedImages, pad);
+function stitchImages(input) {
+  const {
+    toStitch, padding, outputName, generateHtml, styleName, stylePrefix,
+  } = input;
+  const sortedImages = toStitch.sort((a, b) => a.height < b.height);
+  const boxPlacements = calculatePlacements(sortedImages, padding);
   const { boxes, maxWidth, maxHeight } = boxPlacements;
-  const outputImage = PImage.make(maxWidth + pad * 2, maxHeight + pad * 2);
+  const outputImage = PImage.make(maxWidth + padding * 2, maxHeight + padding * 2);
   const context = outputImage.getContext('2d');
   const backgroundSize = [];
   const backgroundPos = [];
@@ -73,11 +89,18 @@ function stitchImages(values, pad, outputName, generateHtml) {
     boxsizes.push({ x: outputWidth, y: outputHeight });
   }
   // console.log(boxes, backgroundSize, backgroundPos);
-  encodeImage(outputImage, pad, outputName);
+  encodeImage(outputImage, padding, outputName);
   if (generateHtml) {
-    console.log('writingHtml');
     writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName);
   }
+  writeCSS({
+    boxsizes,
+    backgroundSize,
+    backgroundPos,
+    outputName,
+    styleName,
+    stylePrefix,
+  });
 }
 
 function calcBackgroundAxis(spriteSize, imageSize) {
@@ -96,16 +119,35 @@ function writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName) {
   toWrite += '</html>';
   fs.writeFile('index.html', toWrite, (err) => {
     if (err) {
-      console.error(err);
+      console.error(error(err));
     }
-    console.log('html generated!');
-    return true;
+    console.log(success('html generated!'));
+  });
+}
+
+function writeCSS(input) {
+  const {
+    boxsizes,
+    backgroundSize,
+    backgroundPos,
+    outputName,
+    styleName,
+    stylePrefix,
+  } = input;
+  let toWrite = `${stylePrefix}-background {\n    background-image: url('${outputName}');\n}\n`;
+
+  fs.writeFile(styleName, toWrite, (err) => {
+    if (err) {
+      console.error(error(err));
+      return;
+    }
+    console.log(success('SCSS generated!'));
   });
 }
 
 function encodeImage(outputImage, pad, outputName) {
   PImage.encodePNGToStream(outputImage, fs.createWriteStream(outputName)).then(() => {
-    console.log('done writing');
+    console.log(success('Image Generated'));
   });
 }
 
