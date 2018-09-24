@@ -11,8 +11,8 @@ export default function genSprite() {
   const outputName = argv.out || argv.o || 'sprite.png';
   const padding = argv.pad || argv.p || 10;
   const generateHtml = argv.generateHtml || argv.g || false;
-  const styleName = argv.styleName || argv.s || 'style.scss';
-  const stylePrefix = argv.stylePrefix || (new Date()).getTime();
+  const styleName = argv.styleName || argv.s || 'style.css';
+  const stylePrefix = argv.stylePrefix || `p${(new Date()).getTime()}`;
   const indentSp = '  ';
   // todo: find a better default style prefix
   packImages({

@@ -95,17 +95,15 @@ function stitchImages(input) {
       y: calcBackgroundAxis(maxHeight, outputHeight),
     });
     backgroundPos.push({
-      x: calcBackgroundPos(boxPlacement.x1, maxWidth, outputWidth),
-      y: calcBackgroundPos(boxPlacement.y1, maxHeight, outputHeight),
+      x: calcBackgroundPos(boxPlacement.x1, maxWidth, outputWidth, padding),
+      y: calcBackgroundPos(boxPlacement.y1, maxHeight, outputHeight, padding),
     });
     boxsizes.push({ x: outputWidth, y: outputHeight });
   }
   // console.log(boxes, backgroundSize, backgroundPos);
   encodeImage(outputImage, padding, outputName);
-  if (generateHtml) {
-    writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName);
-  }
   writeCSS({
+    generateHtml,
     boxsizes,
     backgroundSize,
     backgroundPos,
@@ -121,16 +119,17 @@ function calcBackgroundAxis(spriteSize, imageSize) {
   return 100 * spriteSize / imageSize;
 }
 
-function calcBackgroundPos(offset, spriteSize, imageSize) {
-  return 100 * offset / Math.abs(spriteSize - imageSize);
+function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
+  return 100 * (offset - (pad / 2)) / Math.abs(spriteSize - imageSize);
 }
 
-function writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName) {
-  let toWrite = '<html>';
-  for (let i = 0; i < backgroundSize.length; i += 1) {
-    toWrite += `<div style="background-image: url('${outputName}'); width: ${boxsizes[i].x}; height:  ${boxsizes[i].y}; background-size: ${backgroundSize[i].x}% ${backgroundSize[i].y}%; background-position: ${backgroundPos[i].x}% ${backgroundPos[i].y}%;"> </div>`;
+function writeHtmlPreview(backgroundName, classNames, styleName) {
+  let toWrite = `<html><head><link rel="stylesheet" href="${styleName}" /></head><body>`;
+  for (let i = 0; i < classNames.length; i += 1) {
+    const className = classNames[i];
+    toWrite += `<div class="${backgroundName} ${className}"></div>`;
   }
-  toWrite += '</html>';
+  toWrite += '</body></html>';
   fs.writeFile('index.html', toWrite, (err) => {
     if (err) {
       console.error(error(err));
@@ -141,6 +140,7 @@ function writeHtmlPreview(boxsizes, backgroundSize, backgroundPos, outputName) {
 
 function writeCSS(input) {
   const {
+    generateHtml,
     boxsizes,
     backgroundSize,
     backgroundPos,
@@ -151,12 +151,14 @@ function writeCSS(input) {
     sortedNames,
   } = input;
   let toWrite = `.${stylePrefix}-background {\n${indentSp}background-image: url('${outputName}');\n}\n\n`;
+  const htmlCssClasses = [];
   for (let i = 0; i < boxsizes.length; i += 1) {
     const boxSize = boxsizes[i];
     const bgSize = backgroundSize[i];
     const bgPos = backgroundPos[i];
     const imageName = sortedNames[i].name.replace(/[\s+.]/g, '-').toLowerCase();
     toWrite += `.${stylePrefix}-${imageName} {\n${indentSp}width: ${boxSize.x}px;\n${indentSp}height: ${boxSize.y}px;\n${indentSp}background-size: ${bgSize.x}% ${bgSize.y}%;\n${indentSp}background-position: ${bgPos.x}% ${bgPos.y}%;\n}\n\n`;
+    htmlCssClasses.push(`${stylePrefix}-${imageName}`);
   }
   fs.writeFile(styleName, toWrite, (err) => {
     if (err) {
@@ -165,6 +167,10 @@ function writeCSS(input) {
     }
     console.log(success('SCSS generated!'));
   });
+
+  if (generateHtml) {
+    writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName);
+  }
 }
 
 function encodeImage(outputImage, pad, outputName) {
