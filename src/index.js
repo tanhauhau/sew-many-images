@@ -10,7 +10,7 @@ const success = chalk.bold.green;
 
 export function packImages(inputs) {
   const {
-    folderDir, outputName, padding, generateHtml, styleName, stylePrefix, indentSp,
+    folderDir, outputName, padding, generateHtml, styleName, stylePrefix, indentSp, reactPrefix,
   } = inputs;
   try {
     fs.readdir(folderDir, (err, files) => {
@@ -41,6 +41,7 @@ export function packImages(inputs) {
             styleName,
             stylePrefix,
             indentSp,
+            reactPrefix,
           });
           return true;
         }).catch(err2 => console.log(error(err2)));
@@ -69,7 +70,15 @@ function decodeFromStream(filePath, extension) {
 
 function stitchImages(input) {
   const {
-    toStitch, imagesWithName, padding, outputName, generateHtml, styleName, stylePrefix, indentSp,
+    toStitch,
+    imagesWithName,
+    padding,
+    outputName,
+    generateHtml,
+    styleName,
+    stylePrefix,
+    indentSp,
+    reactPrefix,
   } = input;
   const sortedImages = toStitch.sort((a, b) => a.height < b.height);
   const sortedNames = imagesWithName.sort((a, b) => a.bitmap.height < b.bitmap.height);
@@ -112,15 +121,8 @@ function stitchImages(input) {
     stylePrefix,
     indentSp,
     sortedNames,
+    reactPrefix,
   });
-}
-
-function calcBackgroundAxis(spriteSize, imageSize) {
-  return 100 * spriteSize / imageSize;
-}
-
-function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
-  return 100 * (offset - (pad / 2)) / Math.abs(spriteSize - imageSize);
 }
 
 function writeHtmlPreview(backgroundName, classNames, styleName) {
@@ -138,6 +140,21 @@ function writeHtmlPreview(backgroundName, classNames, styleName) {
   });
 }
 
+function writeReact(backgroundName, classNames, styleName, imageNames) {
+  let toWrite = `import React from 'react';\nimport './${styleName}';\n\n`;
+  for (let i = 0; i < classNames.length; i += 1) {
+    const className = classNames[i];
+    toWrite += `export const ${imageNames[i]} = () => <div className="${backgroundName} ${className}" />;\n\n`;
+  }
+
+  fs.writeFile('images.js', toWrite, (err) => {
+    if (err) {
+      console.error(error(err));
+    }
+    console.log(success('React components generated!'));
+  });
+}
+
 function writeCSS(input) {
   const {
     generateHtml,
@@ -149,6 +166,7 @@ function writeCSS(input) {
     stylePrefix,
     indentSp,
     sortedNames,
+    reactPrefix,
   } = input;
   let toWrite = `.${stylePrefix}-background {\n${indentSp}background-image: url('${outputName}');\n}\n\n`;
   const htmlCssClasses = [];
@@ -171,6 +189,7 @@ function writeCSS(input) {
   if (generateHtml) {
     writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName);
   }
+  writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
 }
 
 function encodeImage(outputImage, pad, outputName) {
@@ -251,4 +270,12 @@ function overlaps(a, b, pad) {
   // no vertical overlap
   if (a.y1 >= b.y2 + pad * 2 || b.y1 >= a.y2 + pad * 2) return false;
   return true;
+}
+
+function calcBackgroundAxis(spriteSize, imageSize) {
+  return 100 * spriteSize / imageSize;
+}
+
+function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
+  return 100 * (offset - (pad / 2)) / Math.abs(spriteSize - imageSize);
 }

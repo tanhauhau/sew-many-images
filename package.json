@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start": "npm run build && node dist/index.js --from ./src/images -g"
+    "start": "npm run build && node dist/index.js --styleName style.css --from ./src/images -g "
   },
   "bin": {
-    "genSprite": "./dist/index.js"
+    "smi": "./dist/index.js"
   },
   "preferGlobal": true,
   "devDependencies": {

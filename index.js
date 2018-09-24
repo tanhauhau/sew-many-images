@@ -8,15 +8,17 @@ export default function genSprite() {
   const argv = minimist(process.argv);
   const givenDirectory = argv.from || argv.f || '';
   const calleeDirectory = process.cwd();
+  const reactPrefix = argv.reactPrefix || argv.r || 'images';
   const outputName = argv.out || argv.o || 'sprite.png';
   const padding = argv.pad || argv.p || 10;
   const generateHtml = argv.generateHtml || argv.g || false;
-  const styleName = argv.styleName || argv.s || 'style.css';
+  const styleName = argv.styleName || argv.s || 'style.scss';
   const stylePrefix = argv.stylePrefix || `p${(new Date()).getTime()}`;
   const indentSp = '  ';
   // todo: find a better default style prefix
   packImages({
     folderDir: path.resolve(calleeDirectory, givenDirectory),
+    reactPrefix,
     outputName,
     padding,
     generateHtml,
