@@ -10,7 +10,7 @@ const success = chalk.bold.green;
 
 export function packImages(inputs) {
   const {
-    folderDir, outputName, padding, generateHtml, styleName, stylePrefix,
+    folderDir, outputName, padding, generateHtml, styleName, stylePrefix, indentSp,
   } = inputs;
   try {
     fs.readdir(folderDir, (err, files) => {
@@ -22,14 +22,25 @@ export function packImages(inputs) {
           promises.push(decodeFromStream(path.join(folderDir, file), extension));
         }
         Promise.all(promises).then((values) => {
-          const toStitch = values.filter((value) => {
-            if (value.error) {
-              console.log(warning(value.error));
+          // stitching becomes weird when we map, so we keep the name as a copy
+          const withName = values.map((value, index) => ({ bitmap: value, name: files[index] }));
+          const imagesWithName = withName.filter((value) => {
+            if (value.bitmap.error) {
+              console.log(warning(value.bitmap.error));
             }
-            return !value.error;
+            return !value.bitmap.error;
           });
+          // remove those files that dont work
+          const toStitch = values.filter(value => !value.error);
           stitchImages({
-            toStitch, padding, outputName, generateHtml, styleName, stylePrefix,
+            toStitch,
+            imagesWithName,
+            padding,
+            outputName,
+            generateHtml,
+            styleName,
+            stylePrefix,
+            indentSp,
           });
           return true;
         }).catch(err2 => console.log(error(err2)));
@@ -58,9 +69,10 @@ function decodeFromStream(filePath, extension) {
 
 function stitchImages(input) {
   const {
-    toStitch, padding, outputName, generateHtml, styleName, stylePrefix,
+    toStitch, imagesWithName, padding, outputName, generateHtml, styleName, stylePrefix, indentSp,
   } = input;
   const sortedImages = toStitch.sort((a, b) => a.height < b.height);
+  const sortedNames = imagesWithName.sort((a, b) => a.bitmap.height < b.bitmap.height);
   const boxPlacements = calculatePlacements(sortedImages, padding);
   const { boxes, maxWidth, maxHeight } = boxPlacements;
   const outputImage = PImage.make(maxWidth + padding * 2, maxHeight + padding * 2);
@@ -100,6 +112,8 @@ function stitchImages(input) {
     outputName,
     styleName,
     stylePrefix,
+    indentSp,
+    sortedNames,
   });
 }
 
@@ -133,9 +147,17 @@ function writeCSS(input) {
     outputName,
     styleName,
     stylePrefix,
+    indentSp,
+    sortedNames,
   } = input;
-  let toWrite = `${stylePrefix}-background {\n    background-image: url('${outputName}');\n}\n`;
-
+  let toWrite = `.${stylePrefix}-background {\n${indentSp}background-image: url('${outputName}');\n}\n\n`;
+  for (let i = 0; i < boxsizes.length; i += 1) {
+    const boxSize = boxsizes[i];
+    const bgSize = backgroundSize[i];
+    const bgPos = backgroundPos[i];
+    const imageName = sortedNames[i].name.replace(/[\s+.]/g, '-').toLowerCase();
+    toWrite += `.${stylePrefix}-${imageName} {\n${indentSp}width: ${boxSize.x}px;\n${indentSp}height: ${boxSize.y}px;\n${indentSp}background-size: ${bgSize.x}% ${bgSize.y}%;\n${indentSp}background-position: ${bgPos.x}% ${bgPos.y}%;\n}\n\n`;
+  }
   fs.writeFile(styleName, toWrite, (err) => {
     if (err) {
       console.error(error(err));

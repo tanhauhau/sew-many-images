@@ -13,8 +13,8 @@ export default function genSprite() {
   const generateHtml = argv.generateHtml || argv.g || false;
   const styleName = argv.styleName || argv.s || 'style.scss';
   const stylePrefix = argv.stylePrefix || (new Date()).getTime();
+  const indentSp = '  ';
   // todo: find a better default style prefix
-  console.log(givenDirectory, generateHtml);
   packImages({
     folderDir: path.resolve(calleeDirectory, givenDirectory),
     outputName,
@@ -22,6 +22,7 @@ export default function genSprite() {
     generateHtml,
     styleName,
     stylePrefix,
+    indentSp,
   });
 }
 
