@@ -18,6 +18,7 @@ export function packImages(inputs) {
     stylePrefix,
     indentSp,
     reactPrefix,
+    outputDir,
   } = inputs;
   try {
     fs.readdir(folderDir, (err, files) => {
@@ -39,6 +40,7 @@ export function packImages(inputs) {
           });
           // remove those files that dont work
           const toStitch = values.filter(value => !value.error);
+          const writeDir = outputDir ? folderDir : '.';
           stitchImages({
             toStitch,
             imagesWithName,
@@ -50,6 +52,7 @@ export function packImages(inputs) {
             stylePrefix,
             indentSp,
             reactPrefix,
+            writeDir,
           });
           return true;
         }).catch(err2 => console.log(error(err2)));
@@ -83,10 +86,12 @@ function stitchImages(input) {
     padding,
     outputName,
     generateHtml,
+    generateReact,
     styleName,
     stylePrefix,
     indentSp,
     reactPrefix,
+    writeDir,
   } = input;
   const sortedImages = toStitch.sort((a, b) => a.height < b.height);
   const sortedNames = imagesWithName.sort((a, b) => a.bitmap.height < b.bitmap.height);
@@ -118,9 +123,10 @@ function stitchImages(input) {
     boxsizes.push({ x: outputWidth, y: outputHeight });
   }
   // console.log(boxes, backgroundSize, backgroundPos);
-  encodeImage(outputImage, padding, outputName);
+  encodeImage(outputImage, padding, outputName, writeDir);
   writeCSS({
     generateHtml,
+    generateReact,
     boxsizes,
     backgroundSize,
     backgroundPos,
@@ -130,17 +136,18 @@ function stitchImages(input) {
     indentSp,
     sortedNames,
     reactPrefix,
+    writeDir,
   });
 }
 
-function writeHtmlPreview(backgroundName, classNames, styleName) {
+function writeHtmlPreview(backgroundName, classNames, styleName, writeDir) {
   let toWrite = `<html><head><link rel="stylesheet" href="${styleName}" /></head><body>`;
   for (let i = 0; i < classNames.length; i += 1) {
     const className = classNames[i];
     toWrite += `<div class="${backgroundName} ${className}"></div>`;
   }
   toWrite += '</body></html>';
-  fs.writeFile('index.html', toWrite, (err) => {
+  fs.writeFile(path.join(writeDir, 'index.html'), toWrite, (err) => {
     if (err) {
       console.error(error(err));
     }
@@ -148,14 +155,14 @@ function writeHtmlPreview(backgroundName, classNames, styleName) {
   });
 }
 
-function writeReact(backgroundName, classNames, styleName, imageNames) {
+function writeReact(backgroundName, classNames, styleName, writeDir, imageNames) {
   let toWrite = `import React from 'react';\nimport './${styleName}';\n\n`;
   for (let i = 0; i < classNames.length; i += 1) {
     const className = classNames[i];
     toWrite += `export const ${imageNames[i]} = () => <div className="${backgroundName} ${className}" />;\n\n`;
   }
 
-  fs.writeFile('images.js', toWrite, (err) => {
+  fs.writeFile(path.join(writeDir, 'images.js'), toWrite, (err) => {
     if (err) {
       console.error(error(err));
     }
@@ -176,6 +183,7 @@ function writeCSS(input) {
     indentSp,
     sortedNames,
     reactPrefix,
+    writeDir,
   } = input;
   let toWrite = `.${stylePrefix}-background {\n${indentSp}background-image: url('${outputName}');\n}\n\n`;
   const htmlCssClasses = [];
@@ -187,7 +195,7 @@ function writeCSS(input) {
     toWrite += `.${stylePrefix}-${imageName} {\n${indentSp}width: ${boxSize.x}px;\n${indentSp}height: ${boxSize.y}px;\n${indentSp}background-size: ${bgSize.x}% ${bgSize.y}%;\n${indentSp}background-position: ${bgPos.x}% ${bgPos.y}%;\n}\n\n`;
     htmlCssClasses.push(`${stylePrefix}-${imageName}`);
   }
-  fs.writeFile(styleName, toWrite, (err) => {
+  fs.writeFile(path.join(writeDir, styleName), toWrite, (err) => {
     if (err) {
       console.error(error(err));
       return;
@@ -195,16 +203,17 @@ function writeCSS(input) {
     console.log(success('SCSS generated!'));
   });
 
-  if (generateHtml) {
-    writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName);
+  if (generateHtml === true) {
+    writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName, writeDir);
   }
-  if (generateReact) {
-    writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
+  if (generateReact === true) {
+    writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, writeDir, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
   }
 }
 
-function encodeImage(outputImage, pad, outputName) {
-  PImage.encodePNGToStream(outputImage, fs.createWriteStream(outputName)).then(() => {
+function encodeImage(outputImage, pad, outputName, writeDir) {
+  PImage.encodePNGToStream(outputImage,
+    fs.createWriteStream(path.join(writeDir, outputName))).then(() => {
     console.log(success('Image Generated'));
   });
 }
