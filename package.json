@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest src",
+    "coverage": "jest --collectCoverageFrom=src/**.js --coverage src",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start": "npm run build && node dist/index.js --styleName style.css --from ./src/images -g "
+    "start": "npm run build && node dist/index.js --styleName style.css --from ./src/images --gh --gr false"
   },
   "bin": {
     "smi": "./dist/index.js"
@@ -18,14 +19,19 @@
     "eslint": "^5.6.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.22.1",
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
+    "jest": "^23.6.0",
     "rimraf": "^2.6.2"
   },
   "author": "tenzy@seagroup",
   "license": "MIT",
   "dependencies": {
+    "app-root-path": "^2.1.0",
     "chalk": "^2.4.1",
+    "crc-32": "^1.2.0",
+    "hi-base32": "^0.5.0",
     "minimist": "^1.2.0",
     "pureimage": "^0.1.6"
   }

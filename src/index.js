@@ -7,10 +7,17 @@ const error = chalk.bold.red;
 const warning = chalk.keyword('orange');
 const success = chalk.bold.green;
 
-
 export function packImages(inputs) {
   const {
-    folderDir, outputName, padding, generateHtml, styleName, stylePrefix, indentSp, reactPrefix,
+    folderDir,
+    outputName,
+    padding,
+    generateHtml,
+    generateReact,
+    styleName,
+    stylePrefix,
+    indentSp,
+    reactPrefix,
   } = inputs;
   try {
     fs.readdir(folderDir, (err, files) => {
@@ -38,6 +45,7 @@ export function packImages(inputs) {
             padding,
             outputName,
             generateHtml,
+            generateReact,
             styleName,
             stylePrefix,
             indentSp,
@@ -158,6 +166,7 @@ function writeReact(backgroundName, classNames, styleName, imageNames) {
 function writeCSS(input) {
   const {
     generateHtml,
+    generateReact,
     boxsizes,
     backgroundSize,
     backgroundPos,
@@ -189,7 +198,9 @@ function writeCSS(input) {
   if (generateHtml) {
     writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName);
   }
-  writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
+  if (generateReact) {
+    writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
+  }
 }
 
 function encodeImage(outputImage, pad, outputName) {
@@ -198,7 +209,7 @@ function encodeImage(outputImage, pad, outputName) {
   });
 }
 
-function calculatePlacements(values, pad) {
+export function calculatePlacements(values, pad) {
   let maxWidth = 0;
   let maxHeight = 0;
   const currBoxes = [];
@@ -251,7 +262,7 @@ function calculatePlacements(values, pad) {
   return { maxWidth, maxHeight, boxes: currBoxes };
 }
 
-function isCollide(currBoxes, newBox, pad) {
+export function isCollide(currBoxes, newBox, pad) {
   let hasCollided = false;
   for (let index = 0; index < currBoxes.length; index += 1) {
     const oldBox = currBoxes[index];
@@ -264,7 +275,7 @@ function isCollide(currBoxes, newBox, pad) {
 }
 
 // x1,y1 = top left, x2, y2= bottom right
-function overlaps(a, b, pad) {
+export function overlaps(a, b, pad) {
   // no horizontal overlap
   if (a.x1 >= b.x2 + pad * 2 || b.x1 >= a.x2 + pad * 2) return false;
   // no vertical overlap
@@ -272,10 +283,10 @@ function overlaps(a, b, pad) {
   return true;
 }
 
-function calcBackgroundAxis(spriteSize, imageSize) {
+export function calcBackgroundAxis(spriteSize, imageSize) {
   return 100 * spriteSize / imageSize;
 }
 
-function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
+export function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
   return 100 * (offset - (pad / 2)) / Math.abs(spriteSize - imageSize);
 }
