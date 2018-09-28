@@ -3,7 +3,7 @@ import {
 } from './index';
 
 test('calcBackgroundPos', () => {
-  expect(calcBackgroundPos(1, 102, 100, 1)).toBe(25);
+  expect(calcBackgroundPos(1, 102, 100, 1)).toBe(50);
 });
 
 test('calcBackgroundAxis', () => {
@@ -53,12 +53,12 @@ test('calculatePlacements', () => {
     boxes: [{
       x1: 2, x2: 12, y1: 2, y2: 12,
     }, {
-      x1: 14, x2: 24, y1: 2, y2: 12,
+      x1: 18, x2: 28, y1: 2, y2: 12,
     }, {
-      x1: 26, x2: 46, y1: 2, y2: 22,
+      x1: 2, x2: 22, y1: 16, y2: 36,
     }],
-    maxHeight: 22,
-    maxWidth: 46,
+    maxHeight: 36,
+    maxWidth: 32,
   };
   expect(calculatePlacements(currBoxes, 2)).toEqual(expected);
 });

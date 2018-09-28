@@ -97,7 +97,7 @@ function stitchImages(input) {
   const sortedNames = imagesWithName.sort((a, b) => a.bitmap.height < b.bitmap.height);
   const boxPlacements = calculatePlacements(sortedImages, padding);
   const { boxes, maxWidth, maxHeight } = boxPlacements;
-  const outputImage = PImage.make(maxWidth + padding * 2, maxHeight + padding * 2);
+  const outputImage = PImage.make(maxWidth, maxHeight);
   const context = outputImage.getContext('2d');
   const backgroundSize = [];
   const backgroundPos = [];
@@ -117,8 +117,8 @@ function stitchImages(input) {
       y: calcBackgroundAxis(maxHeight, outputHeight),
     });
     backgroundPos.push({
-      x: calcBackgroundPos(boxPlacement.x1, maxWidth, outputWidth, padding),
-      y: calcBackgroundPos(boxPlacement.y1, maxHeight, outputHeight, padding),
+      x: calcBackgroundPos(boxPlacement.x1, maxWidth, outputWidth),
+      y: calcBackgroundPos(boxPlacement.y1, maxHeight, outputHeight),
     });
     boxsizes.push({ x: outputWidth, y: outputHeight });
   }
@@ -159,7 +159,7 @@ function writeReact(backgroundName, classNames, styleName, writeDir, imageNames)
   let toWrite = `import React from 'react';\nimport './${styleName}';\n\n`;
   for (let i = 0; i < classNames.length; i += 1) {
     const className = classNames[i];
-    toWrite += `export const ${imageNames[i]} = () => <div className="${backgroundName} ${className}" />;\n\n`;
+    toWrite += `export const ${imageNames[i]} = props => <div className={'${backgroundName} ${className} ' + props.className} />;\n\n`;
   }
 
   fs.writeFile(path.join(writeDir, 'images.js'), toWrite, (err) => {
@@ -191,7 +191,7 @@ function writeCSS(input) {
     const boxSize = boxsizes[i];
     const bgSize = backgroundSize[i];
     const bgPos = backgroundPos[i];
-    const imageName = sortedNames[i].name.replace(/[\s+.]/g, '-').toLowerCase();
+    const imageName = sortedNames[i].name.replace(/[\s+.@]/g, '-').toLowerCase();
     toWrite += `.${stylePrefix}-${imageName} {\n${indentSp}width: ${boxSize.x}px;\n${indentSp}height: ${boxSize.y}px;\n${indentSp}background-size: ${bgSize.x}% ${bgSize.y}%;\n${indentSp}background-position: ${bgPos.x}% ${bgPos.y}%;\n}\n\n`;
     htmlCssClasses.push(`${stylePrefix}-${imageName}`);
   }
@@ -207,7 +207,7 @@ function writeCSS(input) {
     writeHtmlPreview(`${stylePrefix}-background`, htmlCssClasses, styleName, writeDir);
   }
   if (generateReact === true) {
-    writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, writeDir, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
+    writeReact(`${stylePrefix}-background`, htmlCssClasses, styleName, writeDir, sortedNames.map(value => `${reactPrefix.charAt(0).toUpperCase()}${reactPrefix.slice(1)}${value.name.charAt(0).toUpperCase()}${value.name.slice(1).replace(/_([a-z][A-Z])/g, g => g[1].toUpperCase()).replace(/[\s+\-_@]/g, '').replace(/.(jpg|jpeg|png)/g, '')}`));
   }
 }
 
@@ -263,8 +263,8 @@ export function calculatePlacements(values, pad) {
         x2: cursorX + newbox.width,
         y2: cursorY + newbox.height,
       });
-      maxWidth = Math.max(maxWidth, cursorX + newbox.width);
-      maxHeight = Math.max(maxHeight, cursorY + newbox.height);
+      maxWidth = Math.max(maxWidth, cursorX + newbox.width) + pad * 2;
+      maxHeight = Math.max(maxHeight, cursorY + newbox.height) + pad * 2;
       isInserted = true;
     }
   }
@@ -296,6 +296,6 @@ export function calcBackgroundAxis(spriteSize, imageSize) {
   return 100 * spriteSize / imageSize;
 }
 
-export function calcBackgroundPos(offset, spriteSize, imageSize, pad) {
-  return 100 * (offset - (pad / 2)) / Math.abs(spriteSize - imageSize);
+export function calcBackgroundPos(offset, spriteSize, imageSize) {
+  return 100 * (offset) / Math.abs(spriteSize - imageSize);
 }
