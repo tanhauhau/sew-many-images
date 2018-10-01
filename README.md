@@ -17,6 +17,15 @@ or:
 - build project `npm run build`
 - globally install `npm install -g`
 
+or:
+
+`npm install -g sew-many-images`
+
+or:
+
+- `npm install -D sew-many-images`
+- `npx smi`
+
 ## User guide
 change directory to your where your images are and generate 3 files with `smi` in your current working directory
 - `sprite.png`
