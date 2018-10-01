@@ -108,9 +108,11 @@ function stitchImages(input) {
     const currImage = sortedImages[index];
     const outputWidth = boxPlacement.x2 - boxPlacement.x1;
     const outputHeight = boxPlacement.y2 - boxPlacement.y1;
+    // 1 offset is to correct for the image width and height being
+    // 1 pixel longer than the buffer needs to read
     context.drawImage(currImage,
       0, 0, currImage.width, currImage.height,
-      boxPlacement.x1, boxPlacement.y1, outputWidth, outputHeight);
+      boxPlacement.x1, boxPlacement.y1, outputWidth - 1, outputHeight - 1);
 
     backgroundSize.push({
       x: calcBackgroundAxis(maxWidth, outputWidth),
