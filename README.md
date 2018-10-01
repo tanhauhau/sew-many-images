@@ -7,11 +7,11 @@
 - [ ] add flag to resize images before stitching together
 
 ## Quick start guide
-run `git clone https://git.garena.com/tenzy/sew-many-images.git && cd sew-many-images && npm install && npm run build && npm install -g`
+run `git clone https://github.com/Shopee/sew-many-images.git && cd sew-many-images && npm install && npm run build && npm install -g`
 
 or:
 
-- clone this repo `git clone https://git.garena.com/tenzy/sew-many-images.git`
+- clone this repo `git clone https://github.com/Shopee/sew-many-images.git`
 - change directory to the repo `cd sew-many-images`
 - install dependencies `npm install`
 - build project `npm run build`
