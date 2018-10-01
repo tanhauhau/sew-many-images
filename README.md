@@ -1,4 +1,9 @@
 # Sew Many Images
+
+[![npm](https://img.shields.io/npm/v/sew-many-images.svg)](https://www.npmjs.com/package/sew-many-images)
+![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
+[![GitHub forks](https://img.shields.io/github/forks/Shopee/sew-many-images.svg?style=social&label=Fork)](https://github.com/Shopee/sew-many-images)
+
 100% JavaScript implementation for CSS image sprite generator. Have a suggestion/improvement? Please submit an PR or Issue.
 
 **Optional Dependency:** In the repo where you run this command, you can install `app-root-path` to consistently generate the same hash for CSS class prefixes, as we use the location of your image directory to generate these hashes. If `app-root-path` doesn't exist, we will just use your current working directory. Therefore, the same repo on a different directory in the same machine will generate different hashes, but it will still work regardless.
