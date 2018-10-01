@@ -37,7 +37,7 @@ Change directory to where your images are and generate 3 files with `smi` in you
 
 ### Commands and flags
 
-|Command|Short hand|Description|
+|Command|Shorthand|Description|
 |:---|:---|:---|
 |--help|N.A.|If you need to read the docs to understand what this does, maybe you should refresh on your CLI skills|
 |--from|-f|Directory of images to stitch. By default it will crawl through your current working directory|
