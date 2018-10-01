@@ -1,30 +1,21 @@
 # Sew Many Images
 100% javascript implementation for css image sprite generator. Have a suggestion/improvement? Please submit an MR or Issue.
 
-**Optional Dependency:** In the repo where you run this command, you can install `app-root-path` to consistently generate the same hash for css class prefixes, as we use the location of your image directory to generate these hashes. If `app-root-path` doesn't exist, we will just use your current working directory, therefore the same repo on a different directory in the same machine will generate different hashes, but it will still work regardless.
+**Optional Dependency:** In the repo where you run this command, you can install `app-root-path` to consistently generate the same hash for css class prefixes, as we use the location of your image directory to generate these hashes. If `app-root-path` doesn't exist, we will just use your current working directory, therefore the same repo on a different directory in the same machine will generate different hashes, but it will still work regardless. 
 
 ## Todo:
 - [ ] add flag to resize images before stitching together
 
 ## Quick start guide
-run `git clone https://github.com/Shopee/sew-many-images.git && cd sew-many-images && npm install && npm run build && npm install -g`
+run `git clone https://git.garena.com/tenzy/sew-many-images.git && cd sew-many-images && npm install && npm run build && npm install -g`
 
 or:
 
-- clone this repo `git clone https://github.com/Shopee/sew-many-images.git`
+- clone this repo `git clone https://git.garena.com/tenzy/sew-many-images.git`
 - change directory to the repo `cd sew-many-images`
 - install dependencies `npm install`
 - build project `npm run build`
 - globally install `npm install -g`
-
-or:
-
-`npm install -g sew-many-images`
-
-or:
-
-- `npm install -D sew-many-images`
-- `npx smi`
 
 ## User guide
 change directory to your where your images are and generate 3 files with `smi` in your current working directory
@@ -52,11 +43,3 @@ change directory to your where your images are and generate 3 files with `smi` i
 |--indentSp|N.A|css class indent rules with (default two spaces '  ') change this if it doesn't work with your css linting rules|
 
 with ❤ from tenzy
-
-Copyright 2018 Ten Zhi Yang
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

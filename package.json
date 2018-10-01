@@ -1,6 +1,6 @@
 {
   "name": "sew-many-images",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "responsive css sprites generator",
   "main": "index.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "rimraf": "^2.6.2"
   },
   "author": "Ten Zhi Yang",
+  "keywords": ["javascript", "cli", "image-sprites"],
   "license": "MIT",
   "dependencies": {
     "app-root-path": "^2.1.0",
